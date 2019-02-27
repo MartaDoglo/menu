@@ -4,24 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
     <item
-        android:id="@+id/to_usd"
+        android:id="@+id/USD"
         android:orderInCategory="100"
         android:title="To USD"
-        app:showAsAction="never"
+        app:showAsAction="collapseActionView"
         android:onClick="setMode">
     </item>
     <item
-        android:id="@+id/to_eur"
+        android:id="@+id/EUR"
         android:orderInCategory="100"
         android:title="To EUR"
-        app:showAsAction="never"
+        app:showAsAction="collapseActionView"
         android:onClick="setMode">
     </item>
     <item
-        android:id="@+id/to_uah"
+        android:id="@+id/UAH"
         android:orderInCategory="100"
         android:title="To UAH"
-        app:showAsAction="never"
+        app:showAsAction="collapseActionView"
         android:onClick="setMode">
     </item>
 </menu>

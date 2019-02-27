@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     EditText et;
     TextView tv;
-
+    TextView answer;
+    String mode="рубли";
     private double val;
 
     public double getVal() {
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         et = findViewById(R.id.addValue);
         tv = findViewById(R.id.result);
-
+        answer = findViewById(R.id.answer);
         et.setRawInputType(InputType.TYPE_CLASS_NUMBER);
     }
 
@@ -68,25 +69,24 @@ public class MainActivity extends AppCompatActivity {
     public void calculating (){
 
     }
-
     public void solve(View view) {
+
+    }
+    public void getJSON(final String str) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.cbr-xml-daily.ru/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         Api api = retrofit.create(Api.class);
-
         Call<Data> messages =api.getInfo();
-
         messages.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
                 if (response.isSuccessful()) {
-                    Log.d("ZERO_STEP","response " + response.body().getValute().get("USD").getValue());
-                    Log.d("ZERO_STEP","response " + response.body().getValute().get("EUR").getValue());
-                    Log.d("ZERO_STEP","response " + response.body().getValute().get("UAH").getValue());
-                    //tv.setText(""+response.body().getValute().get("USD").getValue());
+                    setVal(response.body().getValute().get(str).getValue());
+                    setNom(response.body().getValute().get(str).getNominal());
+                    tv.setText("Номинал: "+nom+"\nКурс: "+val);
                 } else {
                     Log.d("SECOND_STEP","response code " + response.code());
                 }
@@ -98,21 +98,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     public void setMode(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.to_usd:
-
+            case R.id.USD:
+                mode="USD";
                 break;
-            case R.id.to_eur:
-
+            case R.id.EUR:
+                mode="EUR";
                 break;
-            case R.id.to_uah:
-
+            case R.id.UAH:
+                mode="UAH";
                 break;
             default:
-
         }
+        getJSON(mode);
+    }
 
+    public void planeSolve(View view) {
+        et.setHint("рубли");
+        if(et.getText().length() != 0) {
+            Double get = Double.parseDouble(et.getText().toString());
+            Double result = get / val * nom;
+            answer.setText("" + result);
+        }
+    }
+
+    public void convert(View view) {
+        et.setHint(mode);
+        if(et.getText().length() != 0) {
+            Double get = Double.parseDouble(et.getText().toString());
+            Double result = get * val / nom;
+            answer.setText("" + result);
+        }
     }
 }
