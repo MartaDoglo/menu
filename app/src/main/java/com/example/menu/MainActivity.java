@@ -25,7 +25,11 @@ public class MainActivity extends AppCompatActivity {
     EditText et;
     TextView tv;
     TextView answer;
-    String mode="рубли";
+    String mode = "USD";
+    TextView r1;
+    TextView r2;
+    Boolean status = false;
+
     private double val;
 
     public double getVal() {
@@ -52,8 +56,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         et = findViewById(R.id.addValue);
+        et.setHint("RUS");
+
+
         tv = findViewById(R.id.result);
+
+        r1=findViewById(R.id.r1);
+        r1.setText("RUS");
+        r2=findViewById(R.id.r2);
+        r2.setText(mode);
+        getJSON(mode);
         answer = findViewById(R.id.answer);
+        answer.setText("0");
         et.setRawInputType(InputType.TYPE_CLASS_NUMBER);
     }
 
@@ -63,15 +77,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void choose(MenuItem item) {
-    }
-
-    public void calculating (){
-
-    }
-    public void solve(View view) {
-
-    }
     public void getJSON(final String str) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.cbr-xml-daily.ru/")
@@ -79,57 +84,81 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         Api api = retrofit.create(Api.class);
-        Call<Data> messages =api.getInfo();
+        Call<Data> messages = api.getInfo();
         messages.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
                 if (response.isSuccessful()) {
                     setVal(response.body().getValute().get(str).getValue());
                     setNom(response.body().getValute().get(str).getNominal());
-                    tv.setText("Номинал: "+nom+"\nКурс: "+val);
+                    tv.setText(str + "\nНоминал: " + nom + "\nКурс: " + val);
                 } else {
-                    Log.d("SECOND_STEP","response code " + response.code());
+                    Log.d("SECOND_STEP", "response code " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<Data> call, Throwable t) {
-                Log.d("THIRD_STEP","failure " + t);
+                Log.d("THIRD_STEP", "failure " + t);
             }
         });
     }
 
     public void setMode(MenuItem item) {
-        switch (item.getItemId()){
+
+        r1.setText("RUS");
+        et.setHint("RUS");
+        switch (item.getItemId()) {
+
             case R.id.USD:
-                mode="USD";
+                mode = "USD";
                 break;
             case R.id.EUR:
-                mode="EUR";
+                mode = "EUR";
                 break;
             case R.id.UAH:
-                mode="UAH";
+                mode = "UAH";
                 break;
             default:
         }
+        toMode();
+        r2.setText(mode);
         getJSON(mode);
     }
 
     public void planeSolve(View view) {
-        et.setHint("рубли");
-        if(et.getText().length() != 0) {
-            Double get = Double.parseDouble(et.getText().toString());
-            Double result = get / val * nom;
-            answer.setText("" + result);
-        }
+        if (status==false)
+            toMode();
+        else toRus();
     }
 
-    public void convert(View view) {
-        et.setHint(mode);
-        if(et.getText().length() != 0) {
+    public void toMode (){
+        et.setHint("RUS");
+        r1.setText("RUS");
+        r2.setText(mode);
+        if (et.getText().length() != 0) {
             Double get = Double.parseDouble(et.getText().toString());
-            Double result = get * val / nom;
-            answer.setText("" + result);
+            Double result = get / val * nom;
+            answer.setText("" + Math.floor(result * 100) / 100);
         }
     }
-}
+    public void toRus(){
+        et.setHint(mode);
+        r2.setText("RUS");
+        r1.setText(mode);
+        if (et.getText().length() != 0) {
+            Double get = Double.parseDouble(et.getText().toString());
+            Double result = get * val / nom;
+            answer.setText("" + Math.floor(result * 100) / 100);
+        }
+    }
+        public void convert (View view){
+            if (status==false) {
+                status=true;
+                toRus();
+            } else {
+                toMode();
+                status=false;
+            }
+        }
+    }
